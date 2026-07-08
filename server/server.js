@@ -47,6 +47,56 @@ const server= http.createServer((req,res)=>{
         res.end(JSON.stringify(user));
 
     }
+    else if(url=="/create" && method=="POST"){
+        let body="";
+        req.on("data",(chunk)=>{
+            body+=chunk;
+        })
+        req.on("end", ()=>{
+            const data=JSON.parse(body);
+            const newUser={
+            id:data.id,
+            name:data.name,
+            email:data.email
+        }
+        userdata.push(newUser);
+        })
+        
+        res.statusCode=201;
+        res.end("user created successfully");
+    }
+    else if(url.startsWith("/delete/") && method=="DELETE"){
+        const id=url.split("/")[2];
+        const userindex=userdata.findIndex((u)=>u.id==id);
+        if(userindex==-1){
+            return res.end("user not found");
+        }
+        userdata.splice(userindex,1);
+        res.end("user delete successfully");
+    }
+    else if(url.startsWith("/edit/") && method=="PUT"){
+        const id=url.split("/")[2];
+        const index=userdata.findIndex((u)=>u.id==id);
+        if(index==-1){
+            return res.end("user not found");
+        }
+        let body="";
+        req.on("data",(chunk)=>{
+            body+=chunk;
+        })
+        req.on("end", ()=>{
+            const data=JSON.parse(body);
+            userdata[index]={
+                id,
+            name:data.name,
+            email:data.email
+        }
+        
+        })
+        
+        res.end("user updated successfully");
+
+    }
     else{
         res.statusCode="404";
         res.end("Error page");
